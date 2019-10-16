@@ -6,6 +6,7 @@ using Base.Threads
 using Random
 using PyPlot
 using StatsBase
+using Statistics
 @show Threads.nthreads()
 #-------------------------------------------#
 function main()
@@ -80,12 +81,17 @@ function main()
 	println("possiblePatterns ",possiblePatterns)
 
 	#DATA(key P&L figures)
+	#OLD: SELLING PRICE AND BOTTLING COSTS, NOW REPRESENTED BY MORE GENERIC MARGIN VALUE
 	#price of wine in respective age classes
 	sellingPrice = Dict("young"=>500, "old"=> 5000)
-	supermarketPrice = [200+(i-1)*20 for i in 1:ages[end]]
 	#bottling costs of each respective age class
-	bottlingCosts = Dict("young"=>90, "old"=>1200)
-	supermarketContribution = supermarketPrice .- bottlingCosts["young"]
+	bottlingCosts = Dict("young"=>100, "old"=>1400)
+
+	#new data representation
+	supermarketContribution = [100+(i-1)*20 for i in 1:ages[end]]
+	brandContribution = Dict("young"=>400, "old"=>3600)
+	HtoM = brandContribution["old"]/brandContribution["young"]
+	HtoS = brandContribution["old"]/
 	#wine costs (=production costs) of each respective age class
 	# wineCosts = Dict("young"=> 200, "old"=>273)
 	#holding costs
@@ -182,7 +188,7 @@ function main()
 	demandFulfillment = Dict(a=>allActions[a,numAges+1:end] for a in 1:actionSpaceSize)
 	fulfillYoungOld = Dict(a => Dict("young"=>demandFulfillment[a][1], "old"=>demandFulfillment[a][2]) for a in 1:actionSpaceSize)
 	println("Number of actions: ", actionSpaceSize)
-	actionContribution = Dict(a=>sum(fulfillYoungOld[a][i]*(sellingPrice[i]-bottlingCosts[i]) for i in wineClasses) for a in 1:actionSpaceSize); allActions=nothing
+	actionContribution = Dict(a=>sum(fulfillYoungOld[a][i]*brandContribution[i] for i in wineClasses) for a in 1:actionSpaceSize); allActions=nothing
 	#define applicable actions for each state
 	stateActions  = Dict{Int32,Array{Int16,1}}()
 	sizehint!(stateActions,stateSpaceSize)
